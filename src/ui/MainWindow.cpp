@@ -25,11 +25,18 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->btnRemoveSelected, &QPushButton::clicked, this, [=]() {
-    QList<QListWidgetItem*> items = ui->listFiles->selectedItems();
-    for (QListWidgetItem* item : items) {
-        selectedFiles.removeAll(item->text());
-        delete item;
-    }
+        QList<QListWidgetItem*> items = ui->listFiles->selectedItems();
+        for (QListWidgetItem* item : items) {
+            selectedFiles.removeAll(item->text());
+            delete item;
+        }
+        // 更新文件数量显示
+        if (selectedFiles.isEmpty()) {
+            ui->labelFile->setText("未选择文件");
+        } else {
+            ui->labelFile->setText(QString("已选择 %1 个 文件").arg(selectedFiles.size()));
+        }
+    });
     connect(ui->btnSelectFolder, &QPushButton::clicked, this, &MainWindow::on_btnSelectFolder_clicked);
     QSettings settings("ncmtool", "config");
     QString lastOut = settings.value("lastOutputDir").toString();
@@ -37,14 +44,6 @@ MainWindow::MainWindow(QWidget *parent)
         outputDir = lastOut;
         ui->labelOutput->setText("默认输出路径: " + outputDir);
     }
-
-    // 更新文件数量显示
-    if (selectedFiles.isEmpty()) {
-        ui->labelFile->setText("未选择文件");
-    } else {
-        ui->labelFile->setText(QString("已选择 %1 个 文件").arg(selectedFiles.size()));
-    }
-});
     setAcceptDrops(true);
     ui->comboFormat->addItems({"保持原始格式", "转为 MP3", "转为 FLAC"});
     QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui->comboFormat->model());
